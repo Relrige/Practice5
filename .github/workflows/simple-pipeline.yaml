@@ -1,0 +1,38 @@
+name: My Simple Pipeline
+
+on: [push]
+
+jobs:
+  Checkstyle-Compile-Test-Package:
+    name: Style, Compile, Test and Papckage for release
+    runs-on: ubuntu-latest
+    permissions: write-all
+
+    steps:
+      -  uses: actions/checkout@v4
+
+      - name: Set up JDK 21 (Corretto)
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'corretto'
+
+      - name: Checkstyle validation
+        run: mvn checkstyle:check
+
+      - name: Compile the project
+        run: mvn compile
+
+      - name: Run unit tests
+        run: mvn test
+
+      - name: Package app
+        run: mvn package
+
+      - name: Upload JAR to GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: target/*.jar
+
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
