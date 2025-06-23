@@ -1,7 +1,9 @@
 name: My Simple Pipeline
 
-on: [push]
-
+on:
+  push:
+      tags:
+        - "*"
 jobs:
   Checkstyle-Compile-Test-Package:
     name: Style, Compile, Test and Papckage for release
