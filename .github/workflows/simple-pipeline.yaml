@@ -2,16 +2,17 @@ name: My Simple Pipeline
 
 on:
   push:
-      tags:
-        - "*"
+    tags:
+      - "*"
+
 jobs:
   Checkstyle-Compile-Test-Package:
-    name: Style, Compile, Test and Papckage for release
+    name: Style, Compile, Test, Package, Dockerize
     runs-on: ubuntu-latest
     permissions: write-all
 
     steps:
-      -  uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Set up JDK 21 (Corretto)
         uses: actions/setup-java@v3
@@ -35,6 +36,17 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: target/*.jar
-
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Docker image
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/my-app:${{ github.ref_name }} .
+
+      - name: Push Docker image
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/my-app:${{ github.ref_name }}
